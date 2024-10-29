@@ -10,8 +10,8 @@ POST {{login}}
 Content-Type: application/json
 
 {
-    "email" : "newuser@example.com",
-    "password" : "password123"
+    "email" : "newuser@example2.com",
+    "password" : "password1234"
 }
 
 ### Sign Up
@@ -20,8 +20,8 @@ Content-Type: application/json
 
 {
     "username" : "newuser",
-    "email" : "newuser@example.com",
-    "password" : "password123"
+    "email" : "newuser@example2.com",
+    "password" : "password1234"
 }
 
 ### List Recipes (Requires Authentication)

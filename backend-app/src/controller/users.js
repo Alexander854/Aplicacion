@@ -149,7 +149,7 @@ const ifExist = async (value, table, column, conexion) => {
 // Función para generar un token
 const getToken = (payload) => {
   try {
-    const token = jwt.sign(payload, claveSecreta, { expiresIn: "1000000m" });
+    const token = jwt.sign(payload, claveSecreta);
     return token;
   } catch (error) {
     console.log("Error en getToken:", error.message);

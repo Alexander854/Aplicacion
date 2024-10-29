@@ -1,121 +1,127 @@
 import React, { useState } from "react";
-import { StatusBar, Alert, StyleSheet, Text, View, TextInput, ImageBackground } from 'react-native';
+import { StatusBar, Alert, StyleSheet, Text, View, TextInput } from 'react-native';
 import Boton from "../components/Boton";
-import { login } from '../config/api'; // Importa la URL de login desde tu archivo de configuración
+import { auth } from '../config/FirebaseConfig'; 
+import { signInWithEmailAndPassword } from "firebase/auth";
 
 export default function Login({ navigation }) {
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
+    const [name, setName] = useState({ value: '', error: '' }); // Campo de nombre
+    const [email, setEmail] = useState({ value: '', error: '' });
+    const [password, setPassword] = useState({ value: '', error: '' });
+    const adminEmail = "admin@gmail.com"; // Define el correo de admin aquí
 
-    // Function for login
-    const handleLogin = async () => {
-        try {
-            const response = await fetch(login, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email: username, password }), // Asegúrate de que los nombres de los campos coincidan con los esperados por tu backend
-            });
-            const Data = await response.json();
-            if (Data.success) {
-                await saveToken(Data.token);
-                navigation.navigate("Tabs"); // Navigate to your Tabs screen
-            } else {
-                Alert.alert("Error", "El inicio de sesión ha fallado. Por favor, intenta de nuevo.");
-            }
-        } catch (error) {
-            console.error("Login error: ", error);
-            Alert.alert("Error", "Ocurrió un problema al iniciar sesión.");
-        }
+    const emailValidator = (email) => {
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailPattern.test(email) ? '' : 'Correo electrónico no válido.';
     };
 
-    // Function to save the token
-    const saveToken = async (token) => {
+    const passwordValidator = (password) => {
+        return password.length < 6 ? 'La contraseña debe tener al menos 6 caracteres.' : '';
+    };
+
+    const nameValidator = (name) => {
+        return name.length === 0 ? 'El nombre es requerido.' : ''; // Valida que el campo de nombre no esté vacío
+    };
+
+    const onLoginPressed = async () => {
+        const nameError = nameValidator(name.value);
+        const emailError = emailValidator(email.value);
+        const passwordError = passwordValidator(password.value);
+
+        if (nameError || emailError || passwordError) {
+            setName({ ...name, error: nameError });
+            setEmail({ ...email, error: emailError });
+            setPassword({ ...password, error: passwordError });
+            return; // No continuar si hay errores
+        }
+
         try {
-            await save('token', token);
+            await signInWithEmailAndPassword(auth, email.value, password.value);
+
+            // Verificación del correo del administrador
+            if (email.value === adminEmail) {
+                navigation.reset({ index: 0, routes: [{ name: 'Tabs' }] });
+            } else {
+                navigation.reset({ index: 0, routes: [{ name: 'Tabs' }] });
+            }
         } catch (error) {
-            console.error("Error saving token: ", error);
+            Alert.alert('Error de inicio de sesión', error.message);
         }
     };
 
     return (
-        <ImageBackground
-            source={require("../../assets/login.jpg")}
-            resizeMode="cover"
-            style={styles.background}
-        >
-            <View style={styles.container}>
-                <Text style={styles.titulo}>Bienvenido</Text>
-                <Text style={styles.subtitulo}>inicia con tu cuenta</Text>
+        <View style={styles.container}>
+            <Text style={styles.header}>Bienvenido</Text>
+            <Text style={styles.subtitulo}>Inicia con tu cuenta</Text>
 
-                <TextInput
-                    placeholder="nombre usuario"
-                    style={styles.textInput}
-                    value={username}
-                    onChangeText={setUsername}
-                />
-                <TextInput
-                    placeholder="contraseña"
-                    style={styles.textInput}
-                    value={password}
-                    onChangeText={setPassword}
-                    secureTextEntry={true} // To hide password text
-                />
+            <TextInput
+                placeholder="Nombre"
+                style={[styles.input, { fontSize: 20, borderWidth: 1, borderColor: 'gray', padding: 10, borderRadius: 30 }]}
+                value={name.value}
+                onChangeText={text => setName({ value: text, error: '' })}
+            />
+            {name.error ? <Text style={styles.error}>{name.error}</Text> : null}
 
-                <Text style={styles.register}>registrarse</Text>
-                <Text style={styles.forgotpassword}>te olvidaste la contraseña</Text>
+            <TextInput
+                placeholder="Correo Electrónico"
+                style={[styles.input, { fontSize: 20, borderWidth: 1, borderColor: 'gray', padding: 10, borderRadius: 30 }]}
+                value={email.value}
+                onChangeText={text => setEmail({ value: text, error: '' })}
+            />
+            {email.error ? <Text style={styles.error}>{email.error}</Text> : null}
 
-                <Boton texto="iniciar sesión" onPress={handleLogin} />
-                <StatusBar style="auto" />
+            <TextInput
+                placeholder="Contraseña"
+                style={[styles.input, { fontSize: 20, borderWidth: 1, borderColor: 'gray', padding: 10, borderRadius: 30 }]}
+                value={password.value}
+                onChangeText={text => setPassword({ value: text, error: '' })}
+                secureTextEntry
+            />
+            {password.error ? <Text style={styles.error}>{password.error}</Text> : null}
+
+            <View style={styles.row}>
+                <Text style={styles.link}>¿No tienes una cuenta? Regístrate</Text>
             </View>
-        </ImageBackground>
+            <View style={styles.row}>
+                <Text style={styles.link}>¿Te olvidaste la contraseña?</Text>
+            </View>
+
+            <Boton texto="Iniciar sesión" onPress={onLoginPressed} style={styles.button} />
+            <StatusBar style="auto" />
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
-    background: {
-        flex: 1,
-        width: '100%',
-        height: '100%',
-        justifyContent: 'center',
-    },
     container: {
         flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        padding: 16,
     },
-    titulo: {
-        fontSize: 30,
+    header: {
+        fontSize: 24,
         fontWeight: 'bold',
-        color: 'black',
-        justifyContent: 'center'
+        marginBottom: 20,
+        textAlign: 'center',
     },
-    subtitulo: {
-        fontSize: 20,
-        color: 'lightblue',
-        justifyContent: 'center'
+    input: {
+        marginBottom: 16,
+        width: '80%', // Ajustar el ancho de los campos de entrada
     },
-    textInput: {
-        fontSize: 20,
-        borderWidth: 1,
-        borderColor: 'gray',
-        padding: 10,
-        paddingStart: 40,
-        width: '80%',
-        height: 50,
-        marginTop: 10,
-        borderRadius: 30,
-        backgroundColor: '#fff'
+    button: {
+        marginTop: 16,
     },
-    forgotpassword: {
-        fontSize: 20,
-        color: 'gray',
-        marginTop: 10
+    row: {
+        flexDirection: 'row',
+        marginTop: 12,
+        justifyContent: 'center',
     },
-    register: {
-        fontSize: 20,
-        color: 'gray',
-        marginTop: 10
-    }
+    link: {
+        fontWeight: 'bold',
+        color: 'blue',
+    },
+    error: {
+        color: 'red',
+        marginBottom: 10,
+    },
 });

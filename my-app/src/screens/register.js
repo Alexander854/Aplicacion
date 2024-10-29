@@ -1,97 +1,114 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import Boton from '../components/Boton'; // Asegúrate de que Boton esté en la ubicación correcta
-import { signup } from '../config/api'; // Importa la URL de signup desde tu archivo de configuración
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { TextInput, Button } from 'react-native-paper';
+import { auth, db } from '../config/FirebaseConfig'; // Ajusta la ruta según tu estructura de archivos
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
 
 export default function Register({ navigation }) {
-    const [username, setUsername] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
-    const handleSignUp = async () => {
-        if (!username || !email || !password) {
-            Alert.alert('Error', 'Por favor, completa todos los campos.');
-            return;
-        }
+  const onSignUpPressed = async () => {
+    if (!name || !email || !password) {
+      Alert.alert('Error', 'Por favor, completa todos los campos.');
+      return;
+    }
+  
+    setLoading(true);
+    
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const userId = userCredential.user.uid;
+  
+      await setDoc(doc(db, 'users', userId), {
+        name: name,
+        email: email,
+      });
+  
+      Alert.alert('Usuario creado', 'Registro exitoso');
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Dashboard' }],
+      });
+    } catch (error) {
+      console.error('Error de registro:', error);
+      Alert.alert('Error de registro', error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
 
-        try {
-            const response = await fetch(signup, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ username, email, password }),
-            });
-
-            const result = await response.json();
-
-            if (response.ok) {
-                Alert.alert('Éxito', 'Cuenta creada con éxito');
-                navigation.navigate('Login'); // Redirige a la pantalla de inicio de sesión
-            } else {
-                Alert.alert('Error', result.message || 'No se pudo crear la cuenta');
-            }
-        } catch (error) {
-            console.error('Error al registrar la cuenta:', error);
-            Alert.alert('Error', 'Error al conectar con el servidor');
-        }
-    };
-
-    return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Registrarse</Text>
-            <TextInput
-                placeholder="Nombre de usuario"
-                value={username}
-                onChangeText={setUsername}
-                style={styles.textInput}
-            />
-            <TextInput
-                placeholder="Correo electrónico"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                style={styles.textInput}
-            />
-            <TextInput
-                placeholder="Contraseña"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-                style={styles.textInput}
-            />
-            <Boton texto="Registrarse" onPress={handleSignUp} />
-            <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-                <Text style={styles.loginText}>¿Ya tienes una cuenta? Inicia sesión</Text>
-            </TouchableOpacity>
-        </View>
-    );
+  return (
+    <View style={styles.container}>
+      <Text style={styles.header}>Crear Cuenta</Text>
+      <TextInput
+        label="Nombre"
+        value={name}
+        onChangeText={setName}
+        style={styles.input}
+      />
+      <TextInput
+        label="Correo Electrónico"
+        value={email}
+        onChangeText={setEmail}
+        autoCapitalize="none"
+        keyboardType="email-address"
+        style={styles.input}
+      />
+      <TextInput
+        label="Contraseña"
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
+        style={styles.input}
+      />
+      <Button
+        mode="contained"
+        onPress={onSignUpPressed}
+        loading={loading}
+        style={styles.button}
+      >
+        Registrarse
+      </Button>
+      <View style={styles.row}>
+        <Text>¿Ya tienes una cuenta? </Text>
+        <TouchableOpacity onPress={() => navigation.replace('Login')}>
+          <Text style={styles.link}>Iniciar sesión</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#fff',
-    },
-    title: {
-        fontSize: 30,
-        fontWeight: 'bold',
-        marginBottom: 20,
-    },
-    textInput: {
-        width: '80%',
-        height: 50,
-        borderColor: 'gray',
-        borderWidth: 1,
-        borderRadius: 25,
-        paddingHorizontal: 15,
-        marginBottom: 15,
-    },
-    loginText: {
-        marginTop: 15,
-        fontSize: 16,
-        color: 'blue',
-    },
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    padding: 16,
+  },
+  header: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  input: {
+    marginBottom: 16,
+  },
+  button: {
+    marginTop: 16,
+  },
+  row: {
+    flexDirection: 'row',
+    marginTop: 12,
+    justifyContent: 'center',
+  },
+  link: {
+    fontWeight: 'bold',
+    color: 'blue',
+  },
 });

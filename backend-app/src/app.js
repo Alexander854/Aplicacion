@@ -1,4 +1,11 @@
 //configuración de express
+//env profe DB_HOST=junction.proxy.rlwy.net
+//DB_USER=root 
+//DB_PASSWOR=hlkhBIStWraTNIWjBOKqImkGPBkmZSRF
+//DB_DATABASE=railway
+//DATA_SECRET_KEY= "lab"
+//DB_PORT=19897
+
 import express from "express";
 import cors from "cors";
 import morgan from "morgan";
