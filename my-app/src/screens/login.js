@@ -1,14 +1,15 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import { StatusBar, Alert, StyleSheet, Text, View, TextInput } from 'react-native';
-import Boton from "../components/Boton";
-import { auth } from '../config/FirebaseConfig'; 
-import { signInWithEmailAndPassword } from "firebase/auth";
+import Boton from '../components/Boton';
+import { auth } from '../config/FirebaseConfig';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 
 export default function Login({ navigation }) {
-    const [name, setName] = useState({ value: '', error: '' }); // Campo de nombre
+    const [name, setName] = useState({ value: '', error: '' });
     const [email, setEmail] = useState({ value: '', error: '' });
     const [password, setPassword] = useState({ value: '', error: '' });
-    const adminEmail = "admin@gmail.com"; // Define el correo de admin aquí
+    const [loading, setLoading] = useState(false); // Add loading state
+    const adminEmail = 'admin@gmail.com';
 
     const emailValidator = (email) => {
         const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -20,7 +21,7 @@ export default function Login({ navigation }) {
     };
 
     const nameValidator = (name) => {
-        return name.length === 0 ? 'El nombre es requerido.' : ''; // Valida que el campo de nombre no esté vacío
+        return name.length === 0 ? 'El nombre es requerido.' : '';
     };
 
     const onLoginPressed = async () => {
@@ -32,20 +33,21 @@ export default function Login({ navigation }) {
             setName({ ...name, error: nameError });
             setEmail({ ...email, error: emailError });
             setPassword({ ...password, error: passwordError });
-            return; // No continuar si hay errores
+            return;
         }
+
+        setLoading(true); // Show loading indicator
 
         try {
             await signInWithEmailAndPassword(auth, email.value, password.value);
 
-            // Verificación del correo del administrador
-            if (email.value === adminEmail) {
-                navigation.reset({ index: 0, routes: [{ name: 'Tabs' }] });
-            } else {
-                navigation.reset({ index: 0, routes: [{ name: 'Tabs' }] });
-            }
+            // Redirect based on admin status
+            const targetScreen = email.value === adminEmail ? 'Tabs' : 'Tabs';
+            navigation.reset({ index: 0, routes: [{ name: targetScreen }] });
         } catch (error) {
             Alert.alert('Error de inicio de sesión', error.message);
+        } finally {
+            setLoading(false); // Hide loading indicator
         }
     };
 
@@ -56,7 +58,7 @@ export default function Login({ navigation }) {
 
             <TextInput
                 placeholder="Nombre"
-                style={[styles.input, { fontSize: 20, borderWidth: 1, borderColor: 'gray', padding: 10, borderRadius: 30 }]}
+                style={styles.input}
                 value={name.value}
                 onChangeText={text => setName({ value: text, error: '' })}
             />
@@ -64,7 +66,7 @@ export default function Login({ navigation }) {
 
             <TextInput
                 placeholder="Correo Electrónico"
-                style={[styles.input, { fontSize: 20, borderWidth: 1, borderColor: 'gray', padding: 10, borderRadius: 30 }]}
+                style={styles.input}
                 value={email.value}
                 onChangeText={text => setEmail({ value: text, error: '' })}
             />
@@ -72,7 +74,7 @@ export default function Login({ navigation }) {
 
             <TextInput
                 placeholder="Contraseña"
-                style={[styles.input, { fontSize: 20, borderWidth: 1, borderColor: 'gray', padding: 10, borderRadius: 30 }]}
+                style={styles.input}
                 value={password.value}
                 onChangeText={text => setPassword({ value: text, error: '' })}
                 secureTextEntry
@@ -87,6 +89,8 @@ export default function Login({ navigation }) {
             </View>
 
             <Boton texto="Iniciar sesión" onPress={onLoginPressed} style={styles.button} />
+            {loading && <Text>Cargando...</Text>} {/* Temporary loading indicator */}
+
             <StatusBar style="auto" />
         </View>
     );
@@ -106,7 +110,12 @@ const styles = StyleSheet.create({
     },
     input: {
         marginBottom: 16,
-        width: '80%', // Ajustar el ancho de los campos de entrada
+        fontSize: 20,
+        borderWidth: 1,
+        borderColor: 'gray',
+        padding: 10,
+        borderRadius: 30,
+        width: '80%',
     },
     button: {
         marginTop: 16,
