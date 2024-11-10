@@ -1,130 +1,162 @@
-import React, { useState } from 'react';
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, ImageBackground, TextInput, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, Text, View, FlatList, TouchableOpacity, TextInput, Button } from 'react-native';
+import { collection, onSnapshot, query, where } from 'firebase/firestore';
+import { db } from '../config/FirebaseConfig';
 import { useNavigation } from '@react-navigation/native';
 
 export default function Inicio() {
-    const [searchQuery, setSearchQuery] = useState('');
-    const navigation =useNavigation()
+  const [recipes, setRecipes] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isDarkMode, setIsDarkMode] = useState(false); // Estado para controlar el tema
+  const navigation = useNavigation();
 
-    // Función para manejar la búsqueda
-    const handleSearch = () => {
-        console.log('Buscando recetas para:', searchQuery);
-    };
+  useEffect(() => {
+    // Query to listen for real-time changes in the 'recetas' collection
+    const q = searchTerm
+      ? query(collection(db, 'recetas'), where('title', '>=', searchTerm), where('title', '<=', searchTerm + '\uf8ff'))
+      : collection(db, 'recetas');
+      
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const fetchedRecipes = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setRecipes(fetchedRecipes);
+    });
 
-    // Función para navegar a la pantalla de creación de recetas
-    const handleCreateRecipe = () => {
-        console.log('Navegando a CrearReceta');
-        navigation.navigate("CrearReceta");
-    };
+    return () => unsubscribe(); // Cleanup the subscription on component unmount
+  }, [searchTerm]);
 
-    return (
-        <ImageBackground
-            source={require("../../assets/login.jpg")}
-            resizeMode="cover"
-            style={styles.background}
-        >
-            <View style={styles.container}>
-                <Text style={styles.titulo}>Bienvenido</Text>
+  const handleNavigateToDetails = (recipe) => {
+    navigation.navigate("RecipeDetail", { recipe });
+  };
 
-                {/* Barra de búsqueda y botón de filtro */}
-                <View style={styles.searchContainer}>
-                    <TextInput
-                        style={styles.textInput}
-                        placeholder="Buscar recetas..."
-                        value={searchQuery}
-                        onChangeText={(text) => setSearchQuery(text)}
-                    />
-                    <TouchableOpacity style={styles.filterButton}>
-                        <Text style={styles.filterButtonText}>Filtrar</Text>
-                    </TouchableOpacity>
-                </View>
+  const handleCreateRecipe = () => {
+    navigation.navigate("CrearReceta"); // Navigate to the recipe creation screen
+  };
 
-                {/* Botón para buscar */}
-                <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
-                    <Text style={styles.searchButtonText}>Buscar</Text>
-                </TouchableOpacity>
+  const toggleTheme = () => {
+    setIsDarkMode(prevMode => !prevMode); // Cambiar entre modo claro y oscuro
+  };
 
-                {/* Botón para crear una receta */}
-                <TouchableOpacity style={styles.createButton} onPress={handleCreateRecipe}>
-                    <Text style={styles.createButtonText}>Crear una receta</Text>
-                </TouchableOpacity>
+  const renderRecipe = ({ item }) => (
+    <TouchableOpacity style={[styles.recipeContainer, isDarkMode && styles.recipeContainerDark]} onPress={() => handleNavigateToDetails(item)}>
+      <Text style={[styles.recipeName, isDarkMode && styles.recipeNameDark]}>{item.title}</Text>
+      <Button title="Detalles" onPress={() => handleNavigateToDetails(item)} />
+    </TouchableOpacity>
+  );
 
-                <StatusBar style="auto" />
-            </View>
-        </ImageBackground>
-    );
+  return (
+    <View style={[styles.container, isDarkMode && styles.containerDark]}>
+      <Text style={[styles.titulo, isDarkMode && styles.tituloDark]}>Recetas destacadas</Text>
+
+      {/* Search bar */}
+      <TextInput
+        style={[styles.searchInput, isDarkMode && styles.searchInputDark]}
+        placeholder="Buscar recetas..."
+        placeholderTextColor={isDarkMode ? '#ccc' : '#555'}
+        value={searchTerm}
+        onChangeText={setSearchTerm} // Set search term as user types
+      />
+
+      {/* Recipe List */}
+      <FlatList
+        data={recipes}
+        renderItem={renderRecipe}
+        keyExtractor={item => item.id}
+        contentContainerStyle={styles.recipeList}
+      />
+
+      {/* Button to navigate to the recipe creation screen */}
+      <TouchableOpacity style={[styles.createButton, isDarkMode && styles.createButtonDark]} onPress={handleCreateRecipe}>
+        <Text style={styles.createButtonText}>Crear Receta</Text>
+      </TouchableOpacity>
+
+      {/* Button to toggle theme */}
+      <TouchableOpacity style={styles.themeButton} onPress={toggleTheme}>
+        <Text style={styles.themeButtonText}>{isDarkMode ? 'Modo Claro' : 'Modo Oscuro'}</Text>
+      </TouchableOpacity>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-    background: {
-        flex: 1,
-        width: '100%',
-        height: '100%',
-        justifyContent: 'center',
-    },
-    container: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center'
-    },
-    titulo: {
-        fontSize: 30,
-        fontWeight: 'bold',
-        color: 'black',
-        justifyContent: 'center'
-    },
-    searchContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        width: '80%',
-        marginTop: 10,
-    },
-    textInput: {
-        fontSize: 18,
-        borderWidth: 1,
-        borderColor: 'gray',
-        padding: 10,
-        paddingStart: 20,
-        width: '70%',
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: '#fff'
-    },
-    filterButton: {
-        backgroundColor: '#4285F4',
-        padding: 10,
-        borderRadius: 10,
-        width: '25%',
-        alignItems: 'center',
-    },
-    filterButtonText: {
-        color: 'white',
-        fontWeight: 'bold',
-    },
-    searchButton: {
-        backgroundColor: '#4285F4',
-        padding: 10,
-        borderRadius: 10,
-        marginTop: 10,
-        width: '40%',
-        alignItems: 'center',
-    },
-    searchButtonText: {
-        color: 'white',
-        fontWeight: 'bold',
-    },
-    createButton: {
-        backgroundColor: '#34A853',
-        padding: 10,
-        borderRadius: 10,
-        marginTop: 20,
-        width: '60%',
-        alignItems: 'center',
-    },
-    createButtonText: {
-        color: 'white',
-        fontWeight: 'bold',
-        fontSize: 18,
-    },
+  container: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: '#fff',
+  },
+  containerDark: {
+    backgroundColor: '#333', // Fondo oscuro
+  },
+  titulo: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    color: '#000',
+  },
+  tituloDark: {
+    color: '#fff', // Texto blanco en modo oscuro
+  },
+  searchInput: {
+    height: 40,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    marginBottom: 20,
+  },
+  searchInputDark: {
+    borderColor: '#888', // Borde gris en modo oscuro
+    backgroundColor: '#444', // Fondo gris oscuro
+    color: '#fff', // Texto blanco
+  },
+  recipeList: {
+    paddingHorizontal: 10,
+  },
+  recipeContainer: {
+    backgroundColor: '#eee',
+    padding: 15,
+    marginBottom: 10,
+    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  recipeContainerDark: {
+    backgroundColor: '#555', // Fondo oscuro en las recetas
+  },
+  recipeName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  recipeNameDark: {
+    color: '#fff', // Texto blanco en modo oscuro
+  },
+  createButton: {
+    backgroundColor: '#4CAF50',
+    padding: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  createButtonDark: {
+    backgroundColor: '#2c6f2f', // Fondo verde oscuro en modo oscuro
+  },
+  createButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  themeButton: {
+    backgroundColor: '#333',
+    padding: 10,
+    borderRadius: 8,
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  themeButtonText: {
+    color: '#fff',
+    fontSize: 16,
+  },
 });

@@ -1,12 +1,17 @@
 import Routers from "./src/Router/router";
 
-
+import { AuthProvider } from './src/components/UserContext';
 
 export default function App() {
   return (
-    <Routers>
+    
+    <AuthProvider>
+      <Routers>
 
-    </Routers>
+      </Routers>
+    </AuthProvider>
   );
 }
+
+
 

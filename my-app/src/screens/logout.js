@@ -10,17 +10,13 @@ export default function Logout({ navigation }) {
     };
 
     return (
-        <ImageBackground
-            source={require("../../assets/login.jpg")}
-            resizeMode="cover"
-            style={styles.background}
-        >
+    
             <View style={styles.container}>
                 <Text style={styles.titulo}>Bienvenido</Text>
                 <Boton texto="deslogeate" onPress={handleLogin} />
                 <StatusBar style="auto" />
             </View>
-        </ImageBackground>
+
     );
 }
 

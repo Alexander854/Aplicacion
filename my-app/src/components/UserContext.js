@@ -1,8 +1,8 @@
-// AuthContext.js
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { auth } from '../config/FirebaseConfig';
+import { auth, db } from '../config/FirebaseConfig'; // Asegúrate de tener acceso a Firestore
 import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
+import { collection, addDoc, updateDoc, doc, deleteDoc, serverTimestamp } from 'firebase/firestore'; // Métodos de Firestore
 
 const AuthContext = createContext();
 
@@ -11,7 +11,6 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [darkModeEnabled, setDarkModeEnabled] = useState(false);
 
-  // Check user session and theme preferences on mount
   useEffect(() => {
     const checkUserSession = async () => {
       try {
@@ -26,7 +25,6 @@ export const AuthProvider = ({ children }) => {
       }
     };
 
-    // Firebase listener for auth state changes
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         await AsyncStorage.setItem('user', JSON.stringify(currentUser));
@@ -39,18 +37,15 @@ export const AuthProvider = ({ children }) => {
     });
 
     checkUserSession();
-
-    return unsubscribe; // Cleanup on unmount
+    return unsubscribe;
   }, []);
 
-  // Toggle Dark Mode Preference
   const toggleDarkMode = async () => {
     const newMode = !darkModeEnabled;
     setDarkModeEnabled(newMode);
     await AsyncStorage.setItem('darkMode', JSON.stringify(newMode));
   };
 
-  // User Login
   const login = async (email, password) => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
@@ -62,7 +57,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // User Logout
   const logout = async () => {
     try {
       await signOut(auth);
@@ -73,8 +67,86 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Función para crear una receta
+  const createRecipe = async (title, description) => {
+    if (title.trim() && description.trim()) {
+      try {
+        await addDoc(collection(db, 'recetas'), {
+          title,
+          description,
+          author: user?.uid, // Guardar el ID del usuario actual
+          createdAt: serverTimestamp(),
+        });
+        console.log('Receta creada con éxito');
+      } catch (error) {
+        console.error('Error creando receta:', error);
+      }
+    } else {
+      alert('Por favor, completa todos los campos.');
+    }
+  };
+
+  // Función para editar una receta
+  const editRecipe = async (recipeId, updatedTitle, updatedDescription) => {
+    if (updatedTitle.trim() && updatedDescription.trim()) {
+      try {
+        const recipeRef = doc(db, 'recetas', recipeId);
+        await updateDoc(recipeRef, {
+          title: updatedTitle,
+          description: updatedDescription,
+          updatedAt: serverTimestamp(),
+        });
+        console.log('Receta actualizada con éxito');
+      } catch (error) {
+        console.error('Error actualizando receta:', error);
+      }
+    } else {
+      alert('Por favor, completa todos los campos.');
+    }
+  };
+
+  // Función para borrar una receta
+  const deleteRecipe = async (recipeId) => {
+    try {
+      const recipeRef = doc(db, 'recetas', recipeId);
+      await deleteDoc(recipeRef);
+      console.log('Receta eliminada con éxito');
+    } catch (error) {
+      console.error('Error eliminando receta:', error);
+    }
+  };
+
+  // Función para eliminar la cuenta del usuario
+  const deleteAccount = async () => {
+    try {
+      if (user) {
+        const userRef = doc(db, 'users', user.uid);
+        await deleteDoc(userRef);
+        await auth.currentUser.delete();
+        await AsyncStorage.removeItem('user');
+        setUser(null);
+        await signOut(auth);
+      } else {
+        console.log('No hay un usuario autenticado para eliminar.');
+      }
+    } catch (error) {
+      console.error("Error al eliminar la cuenta: ", error);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading, darkModeEnabled, toggleDarkMode }}>
+    <AuthContext.Provider value={{
+      user,
+      login,
+      logout,
+      deleteAccount,
+      loading,
+      darkModeEnabled,
+      toggleDarkMode,
+      createRecipe,
+      editRecipe,
+      deleteRecipe,
+    }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,136 +1,115 @@
-import React, { useState } from 'react';
-import { StatusBar, Alert, StyleSheet, Text, View, TextInput } from 'react-native';
-import Boton from '../components/Boton';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { TextInput, Button } from 'react-native-paper';
 import { auth } from '../config/FirebaseConfig';
 import { signInWithEmailAndPassword } from 'firebase/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getAuth } from 'firebase/auth'; // Importar la función para acceder a la autenticación de Firebase
+
+const handleModalSubmit = async () => {
+    try {
+        const auth = getAuth(); // Obtener la instancia de autenticación
+        switch (selectedAction) {
+            case 'modifyEmail':
+                await updateDoc(doc(db, 'users', user.uid), { email: inputValue });
+                await auth.currentUser.updateEmail(inputValue); // Actualizar el correo electrónico en Firebase Authentication
+                Alert.alert('Éxito', 'Correo electrónico modificado exitosamente.');
+                break;
+            case 'modifyName':
+                await updateDoc(doc(db, 'users', user.uid), { name: inputValue });
+                // Si deseas actualizar también el displayName en Firebase Authentication
+                await auth.currentUser.updateProfile({ displayName: inputValue });
+                Alert.alert('Éxito', 'Nombre modificado exitosamente.');
+                break;
+            // ... el resto de tu lógica
+        }
+    } catch (error) {
+        console.error('Error al realizar la acción:', error);
+        Alert.alert('Error', 'No se pudo completar la acción.');
+    } finally {
+        setModalVisible(false);
+        setInputValue(''); // Limpiar el campo de entrada
+    }
+};
 
 export default function Login({ navigation }) {
-    const [name, setName] = useState({ value: '', error: '' });
-    const [email, setEmail] = useState({ value: '', error: '' });
-    const [password, setPassword] = useState({ value: '', error: '' });
-    const [loading, setLoading] = useState(false); // Add loading state
-    const adminEmail = 'admin@gmail.com';
+    const [identifier, setIdentifier] = useState(''); // Puede ser nombre o correo electrónico
+    const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState(false);
 
-    const emailValidator = (email) => {
-        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailPattern.test(email) ? '' : 'Correo electrónico no válido.';
-    };
-
-    const passwordValidator = (password) => {
-        return password.length < 6 ? 'La contraseña debe tener al menos 6 caracteres.' : '';
-    };
-
-    const nameValidator = (name) => {
-        return name.length === 0 ? 'El nombre es requerido.' : '';
-    };
+    useEffect(() => {
+        const checkUserSession = async () => {
+            const token = await AsyncStorage.getItem('userToken');
+            // Uncomment if you want to redirect users with existing tokens
+            // if (token) {
+            //     navigation.reset({ index: 0, routes: [{ name: 'Tabs' }] });
+            // }
+        };
+        checkUserSession();
+    }, []);
 
     const onLoginPressed = async () => {
-        const nameError = nameValidator(name.value);
-        const emailError = emailValidator(email.value);
-        const passwordError = passwordValidator(password.value);
-
-        if (nameError || emailError || passwordError) {
-            setName({ ...name, error: nameError });
-            setEmail({ ...email, error: emailError });
-            setPassword({ ...password, error: passwordError });
+        if (!identifier || !password) {
+            Alert.alert('Error', 'Por favor, completa todos los campos.');
             return;
         }
-
-        setLoading(true); // Show loading indicator
-
+        setLoading(true);
         try {
-            await signInWithEmailAndPassword(auth, email.value, password.value);
+            // Aquí puedes agregar lógica para verificar si el identificador es un correo electrónico o un nombre
+            const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier);
+            const loginIdentifier = isEmail ? identifier : `${identifier}@example.com`; // Asume un dominio para nombres de usuario
 
-            // Redirect based on admin status
-            const targetScreen = email.value === adminEmail ? 'Tabs' : 'Tabs';
-            navigation.reset({ index: 0, routes: [{ name: targetScreen }] });
+            await signInWithEmailAndPassword(auth, loginIdentifier, password);
+            const token = await auth.currentUser.getIdToken();
+            await AsyncStorage.setItem('userToken', token);
+            navigation.reset({ index: 0, routes: [{ name: 'Tabs' }] });
         } catch (error) {
             Alert.alert('Error de inicio de sesión', error.message);
         } finally {
-            setLoading(false); // Hide loading indicator
+            setLoading(false);
         }
     };
 
     return (
         <View style={styles.container}>
             <Text style={styles.header}>Bienvenido</Text>
-            <Text style={styles.subtitulo}>Inicia con tu cuenta</Text>
-
             <TextInput
-                placeholder="Nombre"
+                label="Correo Electrónico"
+                value={identifier}
+                onChangeText={setIdentifier}
+                autoCapitalize="none"
+                keyboardType="default"
                 style={styles.input}
-                value={name.value}
-                onChangeText={text => setName({ value: text, error: '' })}
             />
-            {name.error ? <Text style={styles.error}>{name.error}</Text> : null}
-
             <TextInput
-                placeholder="Correo Electrónico"
-                style={styles.input}
-                value={email.value}
-                onChangeText={text => setEmail({ value: text, error: '' })}
-            />
-            {email.error ? <Text style={styles.error}>{email.error}</Text> : null}
-
-            <TextInput
-                placeholder="Contraseña"
-                style={styles.input}
-                value={password.value}
-                onChangeText={text => setPassword({ value: text, error: '' })}
+                label="Contraseña"
+                value={password}
+                onChangeText={setPassword}
                 secureTextEntry
+                style={styles.input}
             />
-            {password.error ? <Text style={styles.error}>{password.error}</Text> : null}
-
+            <Button mode="contained" onPress={onLoginPressed} loading={loading} style={styles.button}>
+                Iniciar sesión
+            </Button>
             <View style={styles.row}>
-                <Text style={styles.link}>¿No tienes una cuenta? Regístrate</Text>
+                <Text>¿No tienes una cuenta? </Text>
+                <TouchableOpacity onPress={() => navigation.replace('registrate')}>
+                    <Text style={styles.link}>Regístrate</Text>
+                </TouchableOpacity>
             </View>
             <View style={styles.row}>
-                <Text style={styles.link}>¿Te olvidaste la contraseña?</Text>
+                <Text>¿Te olvidaste la contraseña?</Text>
             </View>
-
-            <Boton texto="Iniciar sesión" onPress={onLoginPressed} style={styles.button} />
-            {loading && <Text>Cargando...</Text>} {/* Temporary loading indicator */}
-
-            <StatusBar style="auto" />
+            {loading && <ActivityIndicator size="large" color="#0000ff" />}
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        padding: 16,
-    },
-    header: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 20,
-        textAlign: 'center',
-    },
-    input: {
-        marginBottom: 16,
-        fontSize: 20,
-        borderWidth: 1,
-        borderColor: 'gray',
-        padding: 10,
-        borderRadius: 30,
-        width: '80%',
-    },
-    button: {
-        marginTop: 16,
-    },
-    row: {
-        flexDirection: 'row',
-        marginTop: 12,
-        justifyContent: 'center',
-    },
-    link: {
-        fontWeight: 'bold',
-        color: 'blue',
-    },
-    error: {
-        color: 'red',
-        marginBottom: 10,
-    },
+    container: { flex: 1, justifyContent: 'center', padding: 16 },
+    header: { fontSize: 24, fontWeight: 'bold', marginBottom: 20, textAlign: 'center' },
+    input: { marginBottom: 16 },
+    button: { marginTop: 16 },
+    row: { flexDirection: 'row', marginTop: 12, justifyContent: 'center' },
+    link: { fontWeight: 'bold', color: 'blue' },
 });

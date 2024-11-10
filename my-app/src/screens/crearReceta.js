@@ -1,132 +1,181 @@
-import React, { useState } from 'react';
-import { StatusBar, Alert, StyleSheet, Text, View, TextInput, ImageBackground } from 'react-native';
-import Boton from "../components/Boton";
-import { addRecipe } from '../config/api'; // Importa la URL de addRecipe desde tu archivo de configuración
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import { useAuth } from '../components/UserContext'; // Importar el contexto
+import { db } from '../config/FirebaseConfig'; // Asegúrate de importar la configuración de Firebase
+import { collection, addDoc, updateDoc, doc, serverTimestamp } from 'firebase/firestore'; // Funciones de Firestore
 
-export default function CrearReceta({ navigation }) {
-    
-    // Estados para los campos de la receta
-    const [title, setTitle] = useState('');
-    const [description, setDescription] = useState('');
-    const [ingredients, setIngredients] = useState('');
-    const [instructions, setInstructions] = useState('');
-    const [cookingTime, setCookingTime] = useState('');
-    const [difficulty, setDifficulty] = useState('');
+export default function CrearReceta({ navigation, route }) {
+  const { user, darkModeEnabled, editReceta, deleteReceta } = useAuth(); // Usamos el contexto
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [ingredients, setIngredients] = useState('');
+  const [instructions, setInstructions] = useState('');
+  const [cookingTime, setCookingTime] = useState('');
+  const [difficulty, setDifficulty] = useState('');
+  
+  // Si estamos editando una receta, cargamos sus datos en el estado
+  useEffect(() => {
+    if (route.params?.receta) {
+      const { receta } = route.params;
+      setTitle(receta.title);
+      setDescription(receta.description);
+      setIngredients(receta.ingredients);
+      setInstructions(receta.instructions);
+      setCookingTime(receta.cookingTime.toString());
+      setDifficulty(receta.difficulty);
+    }
+  }, [route.params?.receta]);
 
-    // Función para enviar la receta al backend
-    const handleAddRecipe = async () => {
-        try {
-            const response = await fetch(addRecipe, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    title,
-                    description,
-                    ingredients,
-                    instructions,
-                    cooking_time: parseInt(cookingTime), // Asegúrate de enviar un número
-                    difficulty,
-                }),
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                Alert.alert("Éxito", "La receta se ha creado correctamente.");
-                navigation.navigate("Tabs"); // Navega de vuelta al inicio o donde prefieras
-            } else {
-                Alert.alert("Error", `No se pudo crear la receta: ${data.message}`);
-            }
-        } catch (error) {
-            console.error("Error al crear receta: ", error);
-            Alert.alert("Error", "Hubo un problema al crear la receta.");
+  const handleCreateOrUpdateReceta = async () => {
+    if (title.trim() && description.trim() && ingredients.trim() && instructions.trim()) {
+      try {
+        if (route.params?.receta) {
+          // Si estamos editando, usamos `updateDoc`
+          const recetaRef = doc(db, 'recetas', route.params.receta.id); // Obtener referencia del documento
+          await updateDoc(recetaRef, {
+            title,
+            description,
+            ingredients,
+            instructions,
+            cookingTime: parseInt(cookingTime),
+            difficulty,
+          });
+        } else {
+          // Si estamos creando, usamos `addDoc`
+          await addDoc(collection(db, 'recetas'), {
+            title,
+            description,
+            ingredients,
+            instructions,
+            cookingTime: parseInt(cookingTime),
+            difficulty,
+            author: user?.uid,
+            createdAt: serverTimestamp(),
+          });
         }
-    };
+        
+        // Navegar después de la creación o actualización
+        navigation.goBack();
+      } catch (error) {
+        console.error('Error al guardar la receta:', error);
+      }
+    } else {
+      alert('Por favor, completa todos los campos.');
+    }
+  };
 
-    return (
-        <ImageBackground
-            source={require("../../assets/login.jpg")}
-            resizeMode="cover"
-            style={styles.background}
-        >
-            <View style={styles.container}>
-                <Text style={styles.titulo}>Crear Receta</Text>
+  const handleDeleteReceta = async () => {
+    if (route.params?.receta) {
+      await deleteReceta(route.params.receta.id);
+      navigation.goBack();
+    }
+  };
 
-                <TextInput
-                    placeholder="Título"
-                    style={styles.textInput}
-                    value={title}
-                    onChangeText={setTitle}
-                />
-                <TextInput
-                    placeholder="Descripción"
-                    style={styles.textInput}
-                    value={description}
-                    onChangeText={setDescription}
-                />
-                <TextInput
-                    placeholder="Ingredientes"
-                    style={styles.textInput}
-                    value={ingredients}
-                    onChangeText={setIngredients}
-                />
-                <TextInput
-                    placeholder="Instrucciones"
-                    style={styles.textInput}
-                    value={instructions}
-                    onChangeText={setInstructions}
-                />
-                <TextInput
-                    placeholder="Tiempo de cocción (minutos)"
-                    style={styles.textInput}
-                    keyboardType="numeric"
-                    value={cookingTime}
-                    onChangeText={setCookingTime}
-                />
-                <TextInput
-                    placeholder="Dificultad (Easy, Medium, Hard)"
-                    style={styles.textInput}
-                    value={difficulty}
-                    onChangeText={setDifficulty}
-                />
+  return (
+    <View style={[styles.container, darkModeEnabled && styles.darkContainer]}>
+      <Text style={[styles.label, darkModeEnabled && styles.darkLabel]}>Título de la receta</Text>
+      <TextInput
+        style={[styles.input, darkModeEnabled && styles.darkInput]}
+        placeholder="Ingresa el título de la receta"
+        placeholderTextColor={darkModeEnabled ? '#ccc' : '#999'}
+        value={title}
+        onChangeText={setTitle}
+      />
 
-                <Boton texto="Guardar receta" onPress={handleAddRecipe} />
+      <Text style={[styles.label, darkModeEnabled && styles.darkLabel]}>Descripción</Text>
+      <TextInput
+        style={[styles.input, darkModeEnabled && styles.darkInput]}
+        placeholder="Ingresa la descripción de la receta"
+        placeholderTextColor={darkModeEnabled ? '#ccc' : '#999'}
+        value={description}
+        onChangeText={setDescription}
+        multiline
+      />
 
-                <StatusBar style="auto" />
-            </View>
-        </ImageBackground>
-    );
+      <Text style={[styles.label, darkModeEnabled && styles.darkLabel]}>Ingredientes</Text>
+      <TextInput
+        style={[styles.input, darkModeEnabled && styles.darkInput]}
+        placeholder="Lista los ingredientes"
+        placeholderTextColor={darkModeEnabled ? '#ccc' : '#999'}
+        value={ingredients}
+        onChangeText={setIngredients}
+        multiline
+      />
+
+      <Text style={[styles.label, darkModeEnabled && styles.darkLabel]}>Instrucciones</Text>
+      <TextInput
+        style={[styles.input, darkModeEnabled && styles.darkInput]}
+        placeholder="Escribe las instrucciones"
+        placeholderTextColor={darkModeEnabled ? '#ccc' : '#999'}
+        value={instructions}
+        onChangeText={setInstructions}
+        multiline
+      />
+
+      <Text style={[styles.label, darkModeEnabled && styles.darkLabel]}>Tiempo de cocción (minutos)</Text>
+      <TextInput
+        style={[styles.input, darkModeEnabled && styles.darkInput]}
+        placeholder="Tiempo de cocción"
+        keyboardType="numeric"
+        placeholderTextColor={darkModeEnabled ? '#ccc' : '#999'}
+        value={cookingTime}
+        onChangeText={setCookingTime}
+      />
+
+      <Text style={[styles.label, darkModeEnabled && styles.darkLabel]}>Dificultad</Text>
+      <TextInput
+        style={[styles.input, darkModeEnabled && styles.darkInput]}
+        placeholder="Dificultad (Easy, Medium, Hard)"
+        placeholderTextColor={darkModeEnabled ? '#ccc' : '#999'}
+        value={difficulty}
+        onChangeText={setDifficulty}
+      />
+
+      <Button
+        title={route.params?.receta ? 'Actualizar Receta' : 'Crear Receta'}
+        onPress={handleCreateOrUpdateReceta}
+        color={darkModeEnabled ? '#fff' : '#2196F3'}
+      />
+
+      {route.params?.receta && (
+        <Button
+          title="Eliminar Receta"
+          onPress={handleDeleteReceta}
+          color="#FF0000"
+        />
+      )}
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-    background: {
-        flex: 1,
-        width: '100%',
-        height: '100%',
-        justifyContent: 'center',
-    },
-    container: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center'
-    },
-    titulo: {
-        fontSize: 30,
-        fontWeight: 'bold',
-        color: 'black',
-        justifyContent: 'center'
-    },
-    textInput: {
-        fontSize: 20,
-        borderWidth: 1,
-        borderColor: 'gray',
-        padding: 10,
-        width: '80%',
-        height: 50,
-        marginTop: 10,
-        borderRadius: 30,
-        backgroundColor: '#fff'
-    },
+  container: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: '#f8f8f8',
+  },
+  darkContainer: {
+    backgroundColor: '#121212',
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 5,
+    color: '#333',
+  },
+  darkLabel: {
+    color: '#fff',
+  },
+  input: {
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 15,
+  },
+  darkInput: {
+    borderColor: '#444',
+    backgroundColor: '#333',
+    color: '#fff',
+  },
 });

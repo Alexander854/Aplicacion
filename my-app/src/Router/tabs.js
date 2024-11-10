@@ -7,15 +7,9 @@ import Configuracion from "../screens/configuracion";
 import { primaryColor } from "../config/colors";
 
 export default TabsScreens = ({ navigation }) => {
-  const [index, setIndex] = useState(0);
+  const [index, setIndex] = useState(1);
 
   const [routes] = useState([
-    {
-      key: "Home",
-      title: "Inicio",
-      focusedIcon: "home",
-      unfocusedIcon: "home-circle",
-    },
     {
       key: "recetas",
       title: "Recetas",
@@ -23,16 +17,22 @@ export default TabsScreens = ({ navigation }) => {
       unfocusedIcon: "chef-hat",
     },
     {
+      key: "Home",
+      title: "Inicio",
+      focusedIcon: "home",
+      unfocusedIcon: "home-circle",
+    },
+    {
       key: "config",
       title: "Configuración",
-      focusedIcon: "setting" ,
-      unfocusedIcon: "setting-circle",
+      focusedIcon: "cog" ,
+      unfocusedIcon: "cog",
     },
   ]);
 
   const renderScene = BottomNavigation.SceneMap({
-    Home: Home,
     recetas: Recetas,
+    Home: Home,
     config: Configuracion,
   });
 
