@@ -1,6 +1,7 @@
+import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Provider as PaperProvider } from 'react-native-paper';
-import { ThemeProvider } from '../config/themecontext';
+import { useTheme } from '../config/themecontext'; // Importar el hook de uso del tema
 import { primaryColor } from "../config/colors";
 
 import Home from "../screens/home";
@@ -15,8 +16,10 @@ import tabs from './tabs';
 import Configuracion from '../screens/configuracion';
 import RecipeDetail from '../screens/recipedetail';
 
-export default StackScreens = () => {
-    const Stack = createNativeStackNavigator();
+const Stack = createNativeStackNavigator();
+
+export default function StackScreens() {
+    const { theme } = useTheme(); // Obtener el tema actual de ThemeProvider
 
     const opcionesDefault = {
         headerStyle: {
@@ -27,59 +30,52 @@ export default StackScreens = () => {
     };
 
     return (
-        <PaperProvider theme={ThemeProvider}>  {/* Wrap the navigator in PaperProvider */}
-            <Stack.Navigator>
+        <PaperProvider theme={theme}> {/* Pasar el tema global de ThemeProvider al PaperProvider */}
+            <Stack.Navigator screenOptions={opcionesDefault}>
                 <Stack.Screen
                     name="registrate"
                     component={Register}
-                    options={opcionesDefault}
                 />
                 <Stack.Screen
                     name="Login"
                     component={Login}
-                    options={opcionesDefault}
                 />
                 <Stack.Screen
                     name="Tabs"
                     component={tabs}
-                    options={opcionesDefault}
                 />
                 <Stack.Screen
                     name="Logout"
                     component={Logout}
-                    options={opcionesDefault}
                 />
                 <Stack.Screen
                     name="Inicio"
                     component={Home}
-                    options={opcionesDefault}
                 />
                 <Stack.Screen
                     name="LoadingScreen"
                     component={LoadingScreen}
-                    options={opcionesDefault}
                 />   
                 <Stack.Screen
                     name="CrearReceta"
                     component={CrearReceta}
-                    options={opcionesDefault}
                 /> 
                 <Stack.Screen
                     name="Perfil"
                     component={Profile}
-                    options={opcionesDefault}
                 /> 
                 <Stack.Screen
                     name="Configuracion"
                     component={Configuracion}
-                    options={opcionesDefault}
                 /> 
                 <Stack.Screen
                     name="RecipeDetail"
                     component={RecipeDetail}
-                    options={opcionesDefault}
                 />
-                <Stack.Screen name="InicioTabs" component={InicioTabs} />
+                <Stack.Screen
+                    name="InicioTabs"
+                    component={InicioTabs}
+                />
             </Stack.Navigator>
         </PaperProvider>
     );
