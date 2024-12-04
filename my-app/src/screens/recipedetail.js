@@ -86,7 +86,7 @@ export default function RecipeDetail({ route, navigation }) {
       <Text style={styles.description}>{recipe.description}</Text>
       <Text style={styles.description}>Ingredientes: {recipe.ingredients}</Text>
       <Text style={styles.description}>Instrucciones: {recipe.instructions}</Text>
-      <Text style={styles.description}>Tiempo de Cocina: {recipe.cookingTime || 'No disponible'}</Text> {/* Nuevo campo para tiempo de cocina */}
+      <Text style={styles.description}>Tiempo de Cocina: {recipe.cookingTime || 'No disponible'}</Text> 
       <Text style={styles.details}>Difficulty: {recipe.difficulty}</Text>
 
 
@@ -95,7 +95,7 @@ export default function RecipeDetail({ route, navigation }) {
         keyExtractor={(item, index) => index.toString()}
         renderItem={({ item }) => (
           <View style={styles.commentContainer}>
-            <Text>{item.text}</Text> {/* Se eliminó la lógica para mostrar el userId */}
+            <Text>{item.text}</Text> 
             <Text>Calificación: {item.rating}</Text>
           </View>
         )}

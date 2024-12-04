@@ -30,7 +30,7 @@ export default function StackScreens() {
     };
 
     return (
-        <PaperProvider theme={theme}> {/* Pasar el tema global de ThemeProvider al PaperProvider */}
+        <PaperProvider theme={theme}> 
             <Stack.Navigator screenOptions={opcionesDefault}>
                 <Stack.Screen
                     name="registrate"

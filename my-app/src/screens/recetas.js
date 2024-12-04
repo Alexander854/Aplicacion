@@ -91,15 +91,15 @@ export default function Recetas({ navigation }) {
   const renderRecipe = ({ item }) => (
     <View style={styles.recipeContainer}>
       <TouchableOpacity onPress={() => handleNavigateToDetails(item)}>
-        <Text style={styles.recipeName}>{item.title}</Text> {/* Mostrar el título de la receta */}
+        <Text style={styles.recipeName}>{item.title}</Text> 
       </TouchableOpacity>
 
-      {/* Botón para editar receta */}
+    
       <TouchableOpacity style={styles.editButton} onPress={() => handleNavigateToEdit(item)}>
         <Text style={styles.editButtonText}>Editar</Text>
       </TouchableOpacity>
 
-      {/* Botón para eliminar receta */}
+    
       <TouchableOpacity style={styles.deleteButton} onPress={() => handleDeleteRecipe(item.id)}>
         <Text style={styles.deleteButtonText}>Eliminar</Text>
       </TouchableOpacity>
@@ -118,7 +118,7 @@ export default function Recetas({ navigation }) {
         />
 
 
-        {/* Modal para editar receta */}
+    
         <Modal visible={modalVisible} animationType="slide" transparent={true}>
           <View style={styles.modalBackground}>
             <View style={styles.modalContainer}>
@@ -170,7 +170,6 @@ export default function Recetas({ navigation }) {
           </View>
         </Modal>
 
-        {/* Modal de confirmación para eliminar receta */}
         <Modal visible={deleteModalVisible} animationType="slide" transparent={true}>
           <View style={styles.modalBackground}>
             <View style={styles.modalContainer}>

@@ -50,7 +50,7 @@ export default function Inicio() {
     <View style={[styles.container, isDarkMode && styles.containerDark]}>
       <Text style={[styles.titulo, isDarkMode && styles.tituloDark]}>Recetas destacadas</Text>
 
-      {/* Search bar */}
+    
       <TextInput
         style={[styles.searchInput, isDarkMode && styles.searchInputDark]}
         placeholder="Buscar recetas..."
@@ -59,7 +59,7 @@ export default function Inicio() {
         onChangeText={setSearchTerm} // Set search term as user types
       />
 
-      {/* Recipe List */}
+    
       <FlatList
         data={recipes}
         renderItem={renderRecipe}
@@ -67,14 +67,14 @@ export default function Inicio() {
         contentContainerStyle={styles.recipeList}
       />
 
-      {/* Button to navigate to the recipe creation screen */}
+    
       <TouchableOpacity style={[styles.createButton, isDarkMode && styles.createButtonDark]} onPress={handleCreateRecipe}>
         <Text style={styles.createButtonText}>Crear Receta</Text>
       </TouchableOpacity>
 
-      {/* Button to toggle theme */}
+
       <TouchableOpacity style={styles.themeButton} onPress={toggleTheme}>
-        <Text style={styles.themeButtonText}>{isDarkMode ? 'Modo Claro' : 'Modo Oscuro'}</Text>
+        <Text style={styles.themeButtonText}>{isDarkMode ? ' Modo Claro ' : ' Modo Oscuro '}</Text>
       </TouchableOpacity>
     </View>
   );

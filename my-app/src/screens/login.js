@@ -92,13 +92,13 @@ export default function Login({ navigation }) {
                 Iniciar sesión
             </Button>
             <View style={styles.row}>
-                <Text>¿No tienes una cuenta? </Text>
+                <Text>¿ No tienes una cuenta ? </Text>
                 <TouchableOpacity onPress={() => navigation.replace('registrate')}>
                     <Text style={styles.link}>Regístrate</Text>
                 </TouchableOpacity>
             </View>
             <View style={styles.row}>
-                <Text>¿Te olvidaste la contraseña?</Text>
+                <Text>¿olvidaste la contraseña?</Text>
             </View>
             {loading && <ActivityIndicator size="large" color="#0000ff" />}
         </View>
