@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState } from 'react';
-import { DefaultTheme } from 'react-native-paper';
+import { DefaultTheme, PaperProvider } from 'react-native-paper'; // Importa PaperProvider
 
 const ThemeContext = createContext();
 
@@ -34,9 +34,14 @@ export const ThemeProvider = ({ children }) => {
     setIsDarkMode((prevMode) => !prevMode); // Alterna entre los modos
   };
 
+  const currentTheme = isDarkMode ? darkTheme : lightTheme;
+
   return (
-    <ThemeContext.Provider value={{ isDarkMode, toggleTheme, theme: isDarkMode ? darkTheme : lightTheme }}>
-      {children} {/* Asegúrate de envolver a los hijos */}
+    <ThemeContext.Provider value={{ isDarkMode, toggleTheme, theme: currentTheme }}>
+      {/* Asegúrate de envolver a los hijos con PaperProvider para que el tema sea aplicado correctamente */}
+      <PaperProvider theme={currentTheme}>
+        {children}
+      </PaperProvider>
     </ThemeContext.Provider>
   );
 };
