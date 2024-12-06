@@ -73,9 +73,6 @@ export default function Inicio() {
       </TouchableOpacity>
 
 
-      <TouchableOpacity style={styles.themeButton} onPress={toggleTheme}>
-        <Text style={styles.themeButtonText}>{isDarkMode ? ' Modo Claro ' : ' Modo Oscuro '}</Text>
-      </TouchableOpacity>
     </View>
   );
 }
