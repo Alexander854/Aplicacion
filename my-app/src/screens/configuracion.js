@@ -150,7 +150,7 @@ export default function Configuracion() {
                 contentContainerStyle={styles.optionList}
             />
 
-            {/* Modal de confirmación para modificar datos */}
+    
             <Modal
                 visible={isModalVisible}
                 animationType="slide"
@@ -176,7 +176,7 @@ export default function Configuracion() {
                 </View>
             </Modal>
 
-            {/* Modal de confirmación para eliminar cuenta */}
+        
             <Modal
                 visible={isModalVisible && selectedAction === 'deleteAccount'}
                 animationType="slide"
@@ -254,7 +254,6 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         paddingHorizontal: 10,
         marginBottom: 20,
-        width: '100%',
-        backgroundColor: '#fff',
+        fontSize: 16,
     },
 });
