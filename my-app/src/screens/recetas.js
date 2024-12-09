@@ -3,6 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, FlatList, TouchableOpacity, Alert, Modal, TextInput, Button } from 'react-native';
 import { collection, onSnapshot, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../config/FirebaseConfig';
+import { darkTheme } from '../config/tema';
 
 export default function Recetas({ navigation }) {
   const [recipes, setRecipes] = useState([]); // Estado para las recetas
@@ -205,7 +206,7 @@ const styles = StyleSheet.create({
   titulo: {
     fontSize: 30,
     fontWeight: 'bold',
-    color: 'black',
+    color:'#9F14C9',// Cambia según el estado
     marginBottom: 20,
   },
   recipeList: {
@@ -234,7 +235,7 @@ const styles = StyleSheet.create({
   recipeName: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#9F14C9' , // Cambia según el estado
   },
   floatingButton: {
     position: 'absolute',
@@ -303,4 +304,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
+  tituloDark: {
+    color: 'white',
+  }
 });
+

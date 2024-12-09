@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, FlatList, TouchableOpacity, TextInput } from 'r
 import { collection, onSnapshot, query, where } from 'firebase/firestore';
 import { db } from '../config/FirebaseConfig';
 import { useNavigation } from '@react-navigation/native';
-
+import { darkTheme,lightTheme } from '../config/tema';
 export default function Inicio() {
   const [recipes, setRecipes] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -83,10 +83,10 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
-    color: '#000',
+    color: '#9F14C9',
   },
   tituloDark: {
-    color: '#fff', // Texto blanco en modo oscuro
+    color: darkTheme ? 'black' : lightTheme ? 'white' : 'black',    // Texto blanco en modo oscuro
   },
   searchInput: {
     height: 40,
@@ -124,7 +124,7 @@ const styles = StyleSheet.create({
     color: '#fff', // Texto blanco en modo oscuro
   },
   detailsButton: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: 'lightblue',
     padding: 10,
     borderRadius: 8,
     alignItems: 'center',
@@ -137,14 +137,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   createButton: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: 'lightblue',
     padding: 15,
     borderRadius: 8,
     alignItems: 'center',
     marginTop: 10,
   },
   createButtonDark: {
-    backgroundColor: '#2c6f2f', // Fondo verde oscuro en modo oscuro
+    backgroundColor: 'lightblue', // Fondo verde oscuro en modo oscuro
   },
   createButtonText: {
     color: '#fff',

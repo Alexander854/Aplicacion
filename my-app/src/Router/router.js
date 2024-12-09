@@ -2,7 +2,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import StackScreens from "./stack"
 export default Router = () => {
   return (
-    <NavigationContainer>
+    <NavigationContainer> 
       <StackScreens></StackScreens>
     </NavigationContainer>
   );

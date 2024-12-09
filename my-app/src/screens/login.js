@@ -97,9 +97,7 @@ export default function Login({ navigation }) {
                     <Text style={styles.link}>Regístrate</Text>
                 </TouchableOpacity>
             </View>
-            <View style={styles.row}>
-                <Text>¿olvidaste la contraseña?</Text>
-            </View>
+
             {loading && <ActivityIndicator size="large" color="#0000ff" />}
         </View>
     );

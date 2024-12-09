@@ -27,6 +27,7 @@ export default function StackScreens() {
         },
         headerTitleStyle: { color: "white", alignment: "center" },
         headerTitleAlign: "center",
+        headerShown: false ,
     };
 
     return (

@@ -26,7 +26,7 @@ export default function TabsScreens({ navigation }) {
     <View style={styles.container}>
       {/* Barra superior con botón de cambio de tema */}
       <Appbar.Header style={{ backgroundColor: isDarkMode ? "#333" : "#fff" }}>
-        <Appbar.Content title="App" color={isDarkMode ? "#FFD700" : "#000"} />
+        <Appbar.Content title="Cooking Recipes App" color={isDarkMode ? "#FFD700" : "#000"} />
         <Appbar.Action
           icon={isDarkMode ? "white-balance-sunny" : "moon-waning-crescent"}
           onPress={toggleTheme}
