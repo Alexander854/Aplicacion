@@ -3,6 +3,7 @@ import { View, Text, TextInput, Button, StyleSheet, FlatList, Alert } from 'reac
 import { doc, updateDoc, arrayUnion, onSnapshot } from 'firebase/firestore';
 import { db } from '../config/FirebaseConfig';
 import { getAuth } from 'firebase/auth';
+import Icon from 'react-native-vector-icons/FontAwesome'; // Importa el ícono de la flecha
 
 export default function RecipeDetail({ route, navigation }) {
   const { recipe } = route.params;
@@ -82,13 +83,21 @@ export default function RecipeDetail({ route, navigation }) {
 
   return (
     <View style={styles.container}>
+      {/* Botón de volver con ícono de flecha */}
+      <Icon 
+        name="arrow-left" 
+        size={30} 
+        color="#000" 
+        style={styles.backButton} 
+        onPress={() => navigation.goBack()} 
+      />
+
       <Text style={styles.title}>{recipe.title}</Text>
       <Text style={styles.description}>{recipe.description}</Text>
       <Text style={styles.description}>Ingredientes: {recipe.ingredients}</Text>
       <Text style={styles.description}>Instrucciones: {recipe.instructions}</Text>
       <Text style={styles.description}>Tiempo de Cocina: {recipe.cookingTime || 'No disponible'}</Text> 
       <Text style={styles.details}>Difficulty: {recipe.difficulty}</Text>
-
 
       <FlatList
         data={comments}
@@ -122,9 +131,15 @@ export default function RecipeDetail({ route, navigation }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20 },
-  title: { fontSize: 24, fontWeight: 'bold' },
+  title: { fontSize: 24, fontWeight: 'bold', marginTop: 40 }, // Agrega un margen superior al título
   description: { fontSize: 16, marginBottom: 10 },
   commentContainer: { padding: 10, borderBottomWidth: 1, borderBottomColor: '#ddd' },
   creator: { fontSize: 16, fontStyle: 'italic', marginBottom: 10 },
   input: { borderWidth: 1, borderColor: '#ccc', padding: 10, marginBottom: 10, borderRadius: 5 },
+  backButton: {
+    position: 'absolute',
+    top: 10,
+    left: 10,
+    zIndex: 1,
+  },
 });

@@ -1,28 +1,28 @@
-import React, { useEffect } from 'react';
-import { View, ActivityIndicator, Text, StyleSheet } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, ActivityIndicator, Text, StyleSheet, Animated } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 
-const LoadingScreen = ({ message = 'Cargando, por favor espera...' }) => {
+const LoadingScreen = () => {
+  const [fadeAnim] = useState(new Animated.Value(0)); // Valor inicial de la animación (transparente)
   const navigation = useNavigation();
 
-  // Function to check token and navigate
   const checkToken = async () => {
     try {
-      const token = await AsyncStorage.getItem('userToken'); // Adjust key if needed
-      if (token) {
-        // If token exists, navigate to the main screen (e.g., 'Tabs')
-        navigation.reset({
-          index: 0,
-          routes: [{ name: 'Tabs' }],
-        });
-      } else {
-        // If no token, navigate to the Login screen
-        navigation.reset({
-          index: 0,
-          routes: [{ name: 'Login' }],
-        });
-      }
+      const token = await AsyncStorage.getItem('userToken');
+      setTimeout(() => {
+        if (token) {
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'Tabs' }],
+          });
+        } else {
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'Login' }],
+          });
+        }
+      }, 2000);
     } catch (error) {
       console.error('Error checking token:', error);
       navigation.reset({
@@ -34,15 +34,21 @@ const LoadingScreen = ({ message = 'Cargando, por favor espera...' }) => {
 
   useEffect(() => {
     checkToken();
+
+    // Animación de desvanecimiento
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 2000,
+      useNativeDriver: true,
+    }).start();
   }, []);
 
   return (
     <View style={styles.container}>
-      <ActivityIndicator size="large" color="#4CAF50" />
-      <Text style={styles.message}>{message}</Text>
-      <View style={styles.spinnerContainer}>
-        <Text style={styles.loadingText}>Estamos preparándolo todo para ti...</Text>
-      </View>
+      <Animated.View style={{ opacity: fadeAnim }}>
+        <ActivityIndicator size="large" color="red" />
+        <Text style={styles.message}>Cargando...</Text>
+      </Animated.View>
     </View>
   );
 };
@@ -52,25 +58,14 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F1F1F1',
+    backgroundColor: 'black',
     padding: 20,
   },
   message: {
     marginTop: 15,
-    fontSize: 20,
-    color: '#FFD700',
+    fontSize: 18,
     fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  spinnerContainer: {
-    marginTop: 30,
-    alignItems: 'center',
-  },
-  loadingText: {
-    fontSize: 16,
-    color: '#FFFFFF',
-    textAlign: 'center',
-    marginTop: 10,
+    color: '#333',
   },
 });
 

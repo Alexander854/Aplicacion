@@ -3,6 +3,7 @@ import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import { useAuth } from '../components/UserContext'; // Importar el contexto
 import { db } from '../config/FirebaseConfig'; // Asegúrate de importar la configuración de Firebase
 import { collection, addDoc, updateDoc, doc, serverTimestamp } from 'firebase/firestore'; // Funciones de Firestore
+import Icon from 'react-native-vector-icons/FontAwesome'; // Importa el ícono de la flecha
 
 export default function CrearReceta({ navigation, route }) {
   const { user, darkModeEnabled, editReceta, deleteReceta } = useAuth(); // Usamos el contexto
@@ -73,6 +74,15 @@ export default function CrearReceta({ navigation, route }) {
 
   return (
     <View style={[styles.container, darkModeEnabled && styles.darkContainer]}>
+      {/* Botón de volver con ícono de flecha */}
+      <Icon 
+        name="arrow-left" 
+        size={30} 
+        color="#000" 
+        style={styles.backButton} 
+        onPress={() => navigation.goBack()} 
+      />
+
       <Text style={[styles.label, darkModeEnabled && styles.darkLabel]}>Título de la receta</Text>
       <TextInput
         style={[styles.input, darkModeEnabled && styles.darkInput]}
@@ -177,5 +187,11 @@ const styles = StyleSheet.create({
     borderColor: '#444',
     backgroundColor: '#333',
     color: '#fff',
+  },
+  backButton: {
+    position: 'absolute',
+    top: 10,
+    left: 10,
+    zIndex: 1,
   },
 });

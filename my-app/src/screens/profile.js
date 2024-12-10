@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
-import { auth, db } from '../config/FirebaseConfig'; // Adjust the path if necessary
+import { auth, db } from '../config/FirebaseConfig'; // Ajusta el path si es necesario
 import { doc, getDoc } from 'firebase/firestore';
+import Icon from 'react-native-vector-icons/FontAwesome'; // Importa el ícono
 
 export default function Profile({ navigation }) {
   const [userData, setUserData] = useState(null);
@@ -37,7 +38,17 @@ export default function Profile({ navigation }) {
 
   return (
     <View style={styles.container}>
+      {/* Botón de volver con ícono de flecha */}
+      <Icon 
+        name="arrow-left" 
+        size={30} 
+        color="#000" 
+        style={styles.backButton} 
+        onPress={() => navigation.goBack()} 
+      />
+      
       <Text style={styles.header}>Perfil de Usuario</Text>
+      
       {userData ? (
         <View style={styles.infoContainer}>
           <Text style={styles.label}>Nombre:</Text>
@@ -58,19 +69,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: '#f9f9f9', // Light background color
+    backgroundColor: '#f9f9f9', // Color de fondo claro
   },
   header: {
     fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 20,
-    color: '#333', // Dark text color
+    color: '#333', // Color oscuro para el texto
   },
   infoContainer: {
     width: '100%',
     padding: 20,
     borderRadius: 10,
-    backgroundColor: '#fff', // White background for info
+    backgroundColor: '#fff', // Fondo blanco para la info
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
@@ -81,12 +92,12 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     marginBottom: 5,
-    color: '#555', // Dark gray color for labels
+    color: '#555', // Color gris oscuro para las etiquetas
   },
   value: {
     fontSize: 16,
     marginBottom: 15,
-    color: '#000', // Black color for values
+    color: '#000', // Color negro para los valores
     borderBottomColor: '#ccc',
     borderBottomWidth: 1,
     paddingBottom: 5,
@@ -96,6 +107,12 @@ const styles = StyleSheet.create({
   },
   noDataText: {
     fontSize: 16,
-    color: '#777', // Light gray color for no data text
+    color: '#777', // Color gris claro para el texto de sin datos
+  },
+  backButton: {
+    position: 'absolute',
+    top: 10,
+    left: 10,
+    zIndex: 1,
   },
 });

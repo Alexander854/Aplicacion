@@ -51,7 +51,7 @@ export default function Register({ navigation }) {
       <TextInput label="Nombre" value={name} onChangeText={setName} style={styles.input} />
       <TextInput label="Correo Electrónico" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" style={styles.input} />
       <TextInput label="Contraseña" value={password} onChangeText={setPassword} secureTextEntry style={styles.input} />
-      <Button mode="contained" onPress={onSignUpPressed} loading={loading} style={styles.button}>
+      <Button mode="contained" onPress={onSignUpPressed} style={styles.button}>
         Registrarse
       </Button>
       <View style={styles.row}>
