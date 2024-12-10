@@ -98,7 +98,7 @@ export default function Login({ navigation }) {
                 </TouchableOpacity>
             </View>
 
-            {loading && <ActivityIndicator size="large" color="#0000ff" />}
+        
         </View>
     );
 }
