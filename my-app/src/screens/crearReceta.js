@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Picker } from 'react-native';
 import { useAuth } from '../components/UserContext'; // Importar el contexto
 import { db } from '../config/FirebaseConfig'; // Asegúrate de importar la configuración de Firebase
 import { collection, addDoc, updateDoc, doc, serverTimestamp } from 'firebase/firestore'; // Funciones de Firestore
@@ -12,7 +12,7 @@ export default function CrearReceta({ navigation, route }) {
   const [ingredients, setIngredients] = useState('');
   const [instructions, setInstructions] = useState('');
   const [cookingTime, setCookingTime] = useState('');
-  const [difficulty, setDifficulty] = useState('');
+  const [difficulty, setDifficulty] = useState('Easy');
   
   // Si estamos editando una receta, cargamos sus datos en el estado
   useEffect(() => {
@@ -74,7 +74,7 @@ export default function CrearReceta({ navigation, route }) {
 
   return (
     <View style={[styles.container, darkModeEnabled && styles.darkContainer]}>
-      {/* Botón de volver con ícono de flecha */}
+    
       <Icon 
         name="arrow-left" 
         size={30} 
@@ -133,13 +133,15 @@ export default function CrearReceta({ navigation, route }) {
       />
 
       <Text style={[styles.label, darkModeEnabled && styles.darkLabel]}>Dificultad</Text>
-      <TextInput
-        style={[styles.input, darkModeEnabled && styles.darkInput]}
-        placeholder="Dificultad (Easy, Medium, Hard)"
-        placeholderTextColor={darkModeEnabled ? '#ccc' : '#999'}
-        value={difficulty}
-        onChangeText={setDifficulty}
-      />
+      <Picker
+        selectedValue={difficulty}
+        style={[styles.picker, darkModeEnabled && styles.darkPicker]}
+        onValueChange={(itemValue) => setDifficulty(itemValue)}
+      >
+        <Picker.Item label="Fácil" value="Easy" />
+        <Picker.Item label="Media" value="Medium" />
+        <Picker.Item label="Difícil" value="Hard" />
+      </Picker>
 
       <Button
         title={route.params?.receta ? 'Actualizar Receta' : 'Crear Receta'}
@@ -161,7 +163,7 @@ export default function CrearReceta({ navigation, route }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    padding: 40,
     backgroundColor: '#f8f8f8',
   },
   darkContainer: {
@@ -185,6 +187,17 @@ const styles = StyleSheet.create({
   },
   darkInput: {
     borderColor: '#444',
+    backgroundColor: '#333',
+    color: '#fff',
+  },
+  picker: {
+    height: 50,
+    marginBottom: 15,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 5,
+  },
+  darkPicker: {
     backgroundColor: '#333',
     color: '#fff',
   },
