@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, FlatList, TouchableOpacity, Alert, Modal, TextInput, Button } from 'react-native';
+import { StyleSheet, Text, View, FlatList, TouchableOpacity, Alert, Modal, TextInput, Button, Picker } from 'react-native';
 import { collection, onSnapshot, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../config/FirebaseConfig';
 import { darkTheme } from '../config/tema';
@@ -12,7 +12,7 @@ export default function Recetas({ navigation }) {
   const [selectedRecipe, setSelectedRecipe] = useState(null); // Receta seleccionada para editar
   const [updatedTitle, setUpdatedTitle] = useState('');
   const [updatedDescription, setUpdatedDescription] = useState('');
-  const [updatedDifficulty, setUpdatedDifficulty] = useState('');
+  const [updatedDifficulty, setUpdatedDifficulty] = useState('');  // Dificultad en estado
   const [updatedIngredients, setUpdatedIngredients] = useState('');
   const [updatedInstructions, setUpdatedInstructions] = useState('');
   const [updatedCookingTime, setUpdatedCookingTime] = useState('');
@@ -92,15 +92,14 @@ export default function Recetas({ navigation }) {
   const renderRecipe = ({ item }) => (
     <View style={styles.recipeContainer}>
       <TouchableOpacity onPress={() => handleNavigateToDetails(item)}>
-        <Text style={styles.recipeName}>{item.title}</Text> 
+        <Text style={styles.recipeName}>{item.title}</Text>
       </TouchableOpacity>
 
-    
+      {/* Se agrega un margen entre el nombre y el botón de editar */}
       <TouchableOpacity style={styles.editButton} onPress={() => handleNavigateToEdit(item)}>
         <Text style={styles.editButtonText}>Editar</Text>
       </TouchableOpacity>
 
-    
       <TouchableOpacity style={styles.deleteButton} onPress={() => handleDeleteRecipe(item.id)}>
         <Text style={styles.deleteButtonText}>Eliminar</Text>
       </TouchableOpacity>
@@ -108,96 +107,89 @@ export default function Recetas({ navigation }) {
   );
 
   return (
+    <View style={styles.container}>
+      <Text style={styles.titulo}>Recetas</Text>
+      <FlatList
+        data={recipes}
+        renderItem={renderRecipe}
+        keyExtractor={item => item.id}
+        contentContainerStyle={styles.recipeList}
+      />
 
-      <View style={styles.container}>
-        <Text style={styles.titulo}>Recetas</Text>
-        <FlatList
-          data={recipes}
-          renderItem={renderRecipe}
-          keyExtractor={item => item.id}
-          contentContainerStyle={styles.recipeList}
-        />
+      <Modal visible={modalVisible} animationType="slide" transparent={true}>
+        <View style={styles.modalBackground}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Editar Receta</Text>
 
+            <TextInput
+              style={styles.input}
+              placeholder="Título"
+              value={updatedTitle}
+              onChangeText={setUpdatedTitle}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Descripción"
+              value={updatedDescription}
+              onChangeText={setUpdatedDescription}
+            />
+            {/* Cambiar el campo de dificultad a un Picker */}
+            <Picker
+              selectedValue={updatedDifficulty}
+              style={styles.input}
+              onValueChange={(itemValue) => setUpdatedDifficulty(itemValue)}>
+              <Picker.Item label="Fácil" value="Fácil" />
+              <Picker.Item label="Intermedio" value="Intermedio" />
+              <Picker.Item label="Difícil" value="Difícil" />
+            </Picker>
+            <TextInput
+              style={styles.input}
+              placeholder="Ingredientes"
+              value={updatedIngredients}
+              onChangeText={setUpdatedIngredients}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Instrucciones"
+              value={updatedInstructions}
+              onChangeText={setUpdatedInstructions}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Tiempo de cocción"
+              value={updatedCookingTime}
+              onChangeText={setUpdatedCookingTime}
+              keyboardType="numeric"
+            />
 
-    
-        <Modal visible={modalVisible} animationType="slide" transparent={true}>
-          <View style={styles.modalBackground}>
-            <View style={styles.modalContainer}>
-              <Text style={styles.modalTitle}>Editar Receta</Text>
-
-              <TextInput
-                style={styles.input}
-                placeholder="Título"
-                value={updatedTitle}
-                onChangeText={setUpdatedTitle}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Descripción"
-                value={updatedDescription}
-                onChangeText={setUpdatedDescription}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Dificultad"
-                value={updatedDifficulty}
-                onChangeText={setUpdatedDifficulty}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Ingredientes"
-                value={updatedIngredients}
-                onChangeText={setUpdatedIngredients}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Instrucciones"
-                value={updatedInstructions}
-                onChangeText={setUpdatedInstructions}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Tiempo de cocción"
-                value={updatedCookingTime}
-                onChangeText={setUpdatedCookingTime}
-                keyboardType="numeric"
-              />
-
-              <View style={styles.modalButtons}>
-                <Button title="Cancelar" onPress={() => setModalVisible(false)} />
-                <Button title="Guardar Cambios" onPress={handleUpdateRecipe} />
-              </View>
+            <View style={styles.modalButtons}>
+              <Button title="Cancelar" onPress={() => setModalVisible(false)} />
+              <Button title="Guardar Cambios" onPress={handleUpdateRecipe} />
             </View>
           </View>
-        </Modal>
+        </View>
+      </Modal>
 
-        <Modal visible={deleteModalVisible} animationType="slide" transparent={true}>
-          <View style={styles.modalBackground}>
-            <View style={styles.modalContainer}>
-              <Text style={styles.modalTitle}>¿Estás seguro?</Text>
-              <Text>¿Quieres eliminar esta receta?</Text>
+      <Modal visible={deleteModalVisible} animationType="slide" transparent={true}>
+        <View style={styles.modalBackground}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>¿Estás seguro?</Text>
+            <Text>¿Quieres eliminar esta receta?</Text>
 
-              <View style={styles.modalButtons}>
-                <Button title="Cancelar" onPress={() => setDeleteModalVisible(false)} />
-                <Button title="Eliminar" onPress={confirmDeleteRecipe} />
-              </View>
+            <View style={styles.modalButtons}>
+              <Button title="Cancelar" onPress={() => setDeleteModalVisible(false)} />
+              <Button title="Eliminar" onPress={confirmDeleteRecipe} />
             </View>
           </View>
-        </Modal>
+        </View>
+      </Modal>
 
-        <StatusBar style="auto" />
-      </View>
- 
+      <StatusBar style="auto" />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-    width: '100%',
-    height: '100%',
-    justifyContent: 'center',
-  },
   container: {
     flex: 1,
     alignItems: 'center',
@@ -206,7 +198,7 @@ const styles = StyleSheet.create({
   titulo: {
     fontSize: 30,
     fontWeight: 'bold',
-    color:'#9F14C9',// Cambia según el estado
+    color:'#9F14C9',
     marginBottom: 20,
   },
   recipeList: {
@@ -226,41 +218,17 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 5,
   },
-  recipeImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 10,
-    marginRight: 20,
-  },
   recipeName: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#9F14C9' , // Cambia según el estado
-  },
-  floatingButton: {
-    position: 'absolute',
-    bottom: 30,
-    right: 30,
-    width: 60,
-    height: 60,
-    backgroundColor: '#2196F3',
-    borderRadius: 30,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 5,
-  },
-  floatingButtonText: {
-    fontSize: 30,
-    color: '#fff',
+    color: '#9F14C9',
+    marginRight: 15, // Aumenta el margen para dar espacio entre el nombre y los botones
   },
   editButton: {
     backgroundColor: '#4CAF50',
     padding: 10,
     borderRadius: 5,
+    marginLeft: 10,
   },
   editButtonText: {
     color: '#fff',
@@ -304,8 +272,4 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-  tituloDark: {
-    color: 'white',
-  }
 });
-

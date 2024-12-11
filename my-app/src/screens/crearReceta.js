@@ -184,6 +184,9 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     padding: 10,
     marginBottom: 15,
+    backgroundColor: '#fff',
+    fontSize: 16,
+    color: '#333',
   },
   darkInput: {
     borderColor: '#444',
@@ -196,6 +199,7 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     borderWidth: 1,
     borderRadius: 5,
+    backgroundColor: '#fff',
   },
   darkPicker: {
     backgroundColor: '#333',
