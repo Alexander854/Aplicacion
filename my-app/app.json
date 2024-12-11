@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "my-app",
+    "name": "cooking recipes",
     "slug": "my-app",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/iconapp.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
@@ -16,12 +16,19 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/iconapp.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.alexander83282828.myapp"
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "9d7e22c2-9e1b-447c-8f5a-8341eee72bdc"
+      }
+    },
+    "owner": "alexander83282828"
   }
 }

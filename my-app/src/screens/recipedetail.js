@@ -83,7 +83,7 @@ export default function RecipeDetail({ route, navigation }) {
 
   return (
     <View style={styles.container}>
-      {/* Botón de volver con ícono de flecha */}
+
       <Icon 
         name="arrow-left" 
         size={30} 

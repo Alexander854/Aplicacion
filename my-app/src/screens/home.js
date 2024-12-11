@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, FlatList, TouchableOpacity, TextInput } from 'r
 import { collection, onSnapshot, query, where } from 'firebase/firestore';
 import { db } from '../config/FirebaseConfig';
 import { useNavigation } from '@react-navigation/native';
-import { darkTheme,lightTheme } from '../config/tema';
+import { darkTheme,lightTheme } from '../config/themecontext';
 export default function Inicio() {
   const [recipes, setRecipes] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -54,7 +54,7 @@ export default function Inicio() {
       <TextInput
         style={[styles.searchInput, isDarkMode && styles.searchInputDark]}
         placeholder="Buscar recetas..."
-        placeholderTextColor={isDarkMode ? '#ccc' : '#555'}
+        placeholderTextColor={isDarkMode ? 'lightblue' : '#555'}
         value={searchTerm}
         onChangeText={setSearchTerm} // Actualizar el término de búsqueda
       />
@@ -98,8 +98,8 @@ const styles = StyleSheet.create({
   },
   searchInputDark: {
     borderColor: '#888', // Borde gris en modo oscuro
-    backgroundColor: '#444', // Fondo gris oscuro
-    color: '#fff', // Texto blanco
+    backgroundColor: '#555', // Fondo gris oscuro
+    color: 'lightblue', // Texto blanco
   },
   recipeList: {
     paddingHorizontal: 10,

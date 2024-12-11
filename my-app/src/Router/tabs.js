@@ -24,7 +24,7 @@ export default function TabsScreens({ navigation }) {
 
   return (
     <View style={styles.container}>
-      {/* Barra superior con botón de cambio de tema */}
+  
       <Appbar.Header style={{ backgroundColor: isDarkMode ? "#333" : "#fff" }}>
         <Appbar.Content title="Cooking Recipes App" color={isDarkMode ? "#FFD700" : "#000"} />
         <Appbar.Action
@@ -34,7 +34,7 @@ export default function TabsScreens({ navigation }) {
         />
       </Appbar.Header>
 
-      {/* Navegación de pestañas */}
+   
       <BottomNavigation
         navigationState={{ index, routes }}
         onIndexChange={setIndex}

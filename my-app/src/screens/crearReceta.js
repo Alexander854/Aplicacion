@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Picker } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 import { useAuth } from '../components/UserContext'; // Importar el contexto
 import { db } from '../config/FirebaseConfig'; // Asegúrate de importar la configuración de Firebase
 import { collection, addDoc, updateDoc, doc, serverTimestamp } from 'firebase/firestore'; // Funciones de Firestore

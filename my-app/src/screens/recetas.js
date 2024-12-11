@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, FlatList, TouchableOpacity, Alert, Modal, TextInput, Button, Picker } from 'react-native';
+import { StyleSheet, Text, View, FlatList, TouchableOpacity, Alert, Modal, TextInput, Button } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 import { collection, onSnapshot, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../config/FirebaseConfig';
-import { darkTheme } from '../config/tema';
+
 
 export default function Recetas({ navigation }) {
   const [recipes, setRecipes] = useState([]); // Estado para las recetas
@@ -95,7 +96,7 @@ export default function Recetas({ navigation }) {
         <Text style={styles.recipeName}>{item.title}</Text>
       </TouchableOpacity>
 
-      {/* Se agrega un margen entre el nombre y el botón de editar */}
+
       <TouchableOpacity style={styles.editButton} onPress={() => handleNavigateToEdit(item)}>
         <Text style={styles.editButtonText}>Editar</Text>
       </TouchableOpacity>
@@ -133,7 +134,7 @@ export default function Recetas({ navigation }) {
               value={updatedDescription}
               onChangeText={setUpdatedDescription}
             />
-            {/* Cambiar el campo de dificultad a un Picker */}
+  
             <Picker
               selectedValue={updatedDifficulty}
               style={styles.input}
@@ -222,7 +223,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: '#9F14C9',
-    marginRight: 15, // Aumenta el margen para dar espacio entre el nombre y los botones
+    marginRight: 15, 
   },
   editButton: {
     backgroundColor: '#4CAF50',
@@ -272,4 +273,5 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-});
+}
+);
